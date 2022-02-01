@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailJob;
+use App\Jobs\SendMailJob;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\User;
@@ -39,12 +41,18 @@ class AuthController extends Controller
             'token' => $token
         ];
 
+//        queue send_email
+        $details['email'] = $user->email;
+
+        $this->dispatch(new SendMailJob($details));
+
+
         // return response($response, 201);
-        return view('main'); 
+        return view('main');
     }
 
     public function login(Request $request){
-        
+
         $request->validate([
             'email'=>'required',
             'password'=>'required',
@@ -59,9 +67,9 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token
             ];
-            
-            // return response($response, 201); 
-            return redirect('/');           
+
+            // return response($response, 201);
+            return redirect('/');
         }
 
         return response([
